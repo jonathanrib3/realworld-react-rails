@@ -1,0 +1,17 @@
+#!/bin/bash
+
+docker-compose > /dev/null 2>&1
+if [ "$?" = "127" ] ; then
+  shopt -s expand_aliases
+  alias docker-compose="docker compose"
+fi
+
+if [ -n "$(docker ps -f name=real_world_backend | grep -w 'Up' | awk '{print $NF}')" ]; then
+  echo "Re-Using Existing Container..."
+  CMD="docker exec -it real_world_backend_container bash -c '$@'"
+else
+  echo "Creating New Container..."
+  CMD="docker-compose run --name real_world_backend_tmp --rm real_world_backend bash -c 'bundle install && bundle exec rails db:setup && $@'"
+fi
+echo $CMD
+eval $CMD

@@ -1,0 +1,40 @@
+services:
+  real_world_db:
+    image: postgres:latest
+    container_name: real_world_db_container
+    ports:
+      - 5432:5432
+    volumes:
+      - 'db_data:/var/lib/postgres'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=real_world
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d real_world -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  real_world_backend:
+    build: './backend/'
+    container_name: real_world_backend_container
+    ports:
+      - 3000:3000
+    volumes:
+      - './backend/:/var/www/real_world'
+      - 'bundle:/usr/local/bundle'
+    tty: true
+    stdin_open: true
+    command: 'bin/rails server -b 0.0.0.0'
+    external_links:
+      - real_world_db
+    environment:
+      - DB_HOST=real_world_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=docker
+    depends_on:
+      real_world_db:
+        condition: service_healthy
+volumes:
+  db_data:
+  bundle:
