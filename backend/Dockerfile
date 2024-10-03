@@ -7,7 +7,7 @@ FROM ruby:3.2.2
 # Rails app lives here
 WORKDIR /var/www/real_world
 
-ENV RAILS_ENV="development" \
+ENV RAILS_ENV=${RAILS_ENV} \
     BUNDLE_PATH="/usr/local/bundle"
     #BUNDLE_WITHOUT="development"
 

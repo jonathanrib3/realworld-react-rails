@@ -1,7 +1,7 @@
 services:
-  real_world_db:
+  real_world_db_test:
     image: postgres:latest
-    container_name: real_world_db_container
+    container_name: real_world_db_test_container
     ports:
       - 5432:5432
     volumes:
@@ -9,32 +9,30 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=real_world
+      - POSTGRES_DB=real_world_test
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d real_world -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -d real_world_test -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-  real_world_backend:
+  real_world_backend_test:
     build: './backend/'
-    container_name: real_world_backend_container
+    container_name: real_world_backend_test_container
     ports:
       - 3000:3000
     volumes:
       - './backend/:/var/www/real_world'
       - 'bundle:/usr/local/bundle'
-    tty: true
-    stdin_open: true
-    command: 'bin/rails server -b 0.0.0.0'
+    command: 'bundle exec rspec'
     external_links:
-      - real_world_db
+      - real_world_db_test
     environment:
-      - RAILS_ENV=development
-      - DB_HOST=real_world_db
+      - RAILS_ENV=test
+      - DB_HOST=real_world_db_test
       - DB_USERNAME=postgres
       - DB_PASSWORD=docker
     depends_on:
-      real_world_db:
+      real_world_db_test:
         condition: service_healthy
 volumes:
   db_data:
